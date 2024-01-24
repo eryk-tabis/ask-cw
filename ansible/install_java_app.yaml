@@ -1,0 +1,76 @@
+---
+- hosts: app_nodes
+  become: yes
+  vars: 
+    app_url: https://github.com/jkanclerz/e-commerce-pp4/releases/download/v.0.3/application.jar
+    app_dir: /opt/ecommerce
+    app_name: ecommerce
+    my_favourite_software:
+      - cowsay
+      - mc
+      - tree
+    must_have_software:
+      - java-17-amazon-corretto
+  tasks:
+  - name: "My first comment via ansible"
+    command: "echo 'hello world' > hello_world.txt"
+  - name: "install my favourite software"
+    dnf: 
+      name: "{{ my_favourite_software }}"
+      state: latest
+  - name: "install must have software"
+    dnf: 
+      name: "{{ must_have_software }}"
+      state: latest
+  - name: "create my file directory"
+    file:
+      path: "{{app_dir}}"
+      state: directory
+  - name: "download my app"
+    get_url:
+      url: "{{ app_url }}"
+      dest: "{{ app_dir }}/{{ app_name }}.jar"
+  - name: "Put my service config to systemd destiation"
+    template:
+      src: templates/app.service.j2
+      dest: "/etc/systemd/system/{{ app_name }}.service"
+  - name: "Start & add autostart my app"
+    systemd_service:
+      name: "{{ app_name }}"
+      state: restarted
+      enabled: yes
+      daemon-reload: yes
+
+- hosts: db_nodes
+  become: yes
+  vars:
+    my_favourite_software:
+      - cowsay
+    must_have_soft:
+      - MariaDB-server
+      - MariaDB-client
+  tasks:
+    - name: "Put my repo config to Mariadb repo"
+      template:
+        src: templates/mariadb.repo.j2
+        dest: "/etc/yum.repos.d/Mariadb.repo"
+    - name: Install MariaDB Server and Client
+      dnf:
+        name: "{{ must_have_soft }}"
+        state: latest
+    - name: Start and enable MariaDB service
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: "install my favourite software"
+      dnf: 
+        name: "{{ my_favourite_software }}"
+        state: latest
+
+
+
+  
+
+  
+

@@ -1,0 +1,12 @@
+[Unit]
+Description= My {{ app_name }}
+After=network-online.target
+
+[Service]
+Type=simple
+User=ec2-user
+ExecStart=java -Dserver.port=8080 -jar {{ app_dir }}/{{ app_name }}.jar
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
